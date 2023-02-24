@@ -3,3 +3,33 @@ body, html {
   overflow: hidden;
 }
 
+.absolute {
+  position: absolute;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-center {
+  text-align: center;
+}
+
+p {
+  font-size: x-large;
+}
+
+h1 {
+  font-size: larger;
+}
+
+button {
+  border: 1px solid white;
+  padding: 8px;
+  border-radius: 8px;
+}
+
+:hover button {
+  background-color: white;
+  color: gray;
+}

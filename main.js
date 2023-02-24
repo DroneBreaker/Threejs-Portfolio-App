@@ -7,33 +7,43 @@ import gsap from 'gsap'
 const gui = new dat.GUI()
 const world = {
   plane: {
-    width: 18,
-    height: 18, 
-    widthSegments: 24, 
-    heightSegments: 24
+    width: 400,
+    height: 400, 
+    widthSegments: 50, 
+    heightSegments: 50
   }
 }
 
-gui.add(world.plane, 'width', 1, 50).onChange(generatePlane)
-gui.add(world.plane, 'height', 1, 50).onChange(generatePlane)
-gui.add(world.plane, 'widthSegments', 1, 50).onChange(generatePlane)
-gui.add(world.plane, 'heightSegments', 1, 50).onChange(generatePlane)
+gui.add(world.plane, 'width', 1, 500).onChange(generatePlane)
+gui.add(world.plane, 'height', 1, 500).onChange(generatePlane)
+gui.add(world.plane, 'widthSegments', 1, 100).onChange(generatePlane)
+gui.add(world.plane, 'heightSegments', 1, 100).onChange(generatePlane)
 
 function generatePlane() {
   mesh.geometry.dispose()
   mesh.geometry = new THREE.PlaneGeometry(
     world.plane.width, world.plane.height, world.plane.widthSegments, world.plane.heightSegments
   )
-    
 
+  //vertice position random
   const { array } = mesh.geometry.attributes.position
-  for (let i = 0; i < array.length; i += 3) {
-    const x = array[i]
-    const y = array[i + 1]
-    const z = array[i + 2]
+  const randomValues = []
+  for (let i = 0; i < array.length; i ++) {
+    if(i % 3 === 0) { 
+      const x = array[i]
+      const y = array[i + 1]
+      const z = array[i + 2]
 
-    array[i + 2] = z + Math.random()
+      array[i] = x + (Math.random() - 0.5) * 3
+      array[i + 1] = y + (Math.random() - 0.5) * 3
+      array[i + 2] = z + (Math.random() - 0.5) * 4
+    }
+    randomValues.push(Math.random() * Math.PI * 2)
   }
+
+  mesh.geometry.attributes.position.randomValues = randomValues
+  mesh.geometry.attributes.position.originalPosition = mesh.geometry.attributes.position.array
+    
 
   const colors = []
   for (let i = 0; i < mesh.geometry.attributes.position.count; i++) {
@@ -62,41 +72,13 @@ const material = new THREE.MeshPhongMaterial({
  })
 const mesh = new THREE.Mesh(geometry, material)
 scene.add(mesh)
+generatePlane()
 new OrbitControls(camera, renderer.domElement)
-camera.position.z = 5
+camera.position.z = 60
 
-
-//vertice position random
-const { array } = mesh.geometry.attributes.position
-const randomValues = []
-for (let i = 0; i < array.length; i ++) {
-  if(i % 3 === 0) { 
-    const x = array[i]
-    const y = array[i + 1]
-    const z = array[i + 2]
-
-    array[i] = x + (Math.random() - 0.5) * 1.2
-    array[i + 1] = y + (Math.random() - 0.5) * 1.2
-    array[i + 2] = z + Math.random()
-  }
-  randomValues.push(Math.random())
-}
-
-mesh.geometry.attributes.position.randomValues = randomValues
-mesh.geometry.attributes.position.originalPosition = mesh.geometry.attributes.position.array
-
-//color attribute addition
-const colors = []
-for (let i = 0; i < mesh.geometry.attributes.position.count; i++) {
-  colors.push(0, 0.19, 0.4)
-}
-
-mesh.geometry.setAttribute('color', new THREE.BufferAttribute(
-  new Float32Array(colors), 3)
-)
 
 const light = new THREE.DirectionalLight(0xffffff, 1)
-light.position.set(0, 0, 1)
+light.position.set(0, 1, 1)
 scene.add(light)
 
 const backLight = new THREE.DirectionalLight(0xffffff, 1)
@@ -118,7 +100,10 @@ function animate() {
 
   const { array, originalPosition, randomValues } = mesh.geometry.attributes.position
   for (let i = 0; i < array.length; i += 3) {
-    array[i] = originalPosition[i] + Math.cos(frame + randomValues[i]) * 0.01
+    array[i] = originalPosition[i] + Math.cos(frame + randomValues[i]) * 0.005
+
+    // y coordinates
+    array[i + 1] = originalPosition[i + 1] + Math.sin(frame + randomValues[i + 1]) * 0.005
   }
   mesh.geometry.attributes.position.needsUpdate = true
 
